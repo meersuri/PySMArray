@@ -1,0 +1,1 @@
+from SharedMemoryArray.shared_memory_array import SMArray
