@@ -49,13 +49,10 @@ class SMArray:
         self._ndarray = np.ndarray(shape, dtype, buffer=self._shm.buf)
         self._freed = False
 
-    def __setitem__(self, slice_, values):
-        self._ndarray.__setitem__(slice_, values)
-        
     @classmethod
     def from_ndarray(cls, ndarray):
         arr = cls(ndarray.shape, ndarray.dtype)
-        arr[:] = ndarray[:]
+        arr.as_ndarray()[:] = ndarray[:]
         return arr
 
     def as_ndarray(self):
