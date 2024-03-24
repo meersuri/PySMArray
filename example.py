@@ -65,7 +65,7 @@ class ImageProcClass:
     Sending data across process boundaries incurs serialization/deserializatoin + copy overhead
     This exmaple demonstrates that replacing np.ndarrays with SMArrays results in a speedup
     """
-    def __init__(self, paths, worker_count=1, use_smarray=False):
+    def __init__(self, paths, output_height, output_width, worker_count=1, use_smarray=False):
         self._worker_count = worker_count
         self._use_smarray = use_smarray
         self._paths = paths
@@ -78,8 +78,8 @@ class ImageProcClass:
         self._img_queue = multiprocessing.Queue()
         self._task_queue = multiprocessing.Queue()
         self._workers = []
-        self._out_width = 1920
-        self._out_height = 1080
+        self._out_width = output_width
+        self._out_height = output_height
 
     def _process(self, arr):
         # some processing here
@@ -162,8 +162,10 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="An example application that demos speedup using SMArrays")
     parser.add_argument("sources", type=str, nargs='+', help="video/camera paths")
     parser.add_argument("--smarray", dest='use_smarray', action='store_true', help="Wrap np.ndarrays into SMArrays before sending")
+    parser.add_argument("--out-height", dest='output_height', type=int, default=1920, help="Height of the resized output frames")
+    parser.add_argument("--out-width", dest='output_width', type=int, default=1080, help="Width of the resized output frames")
     parser.add_argument("-j", dest='worker_count', type=int, default=1, help="number of worker processes")
     args = parser.parse_args()
     sources = [Path(s).expanduser().resolve() for s in args.sources]
-    ic = ImageProcClass(sources, worker_count=args.worker_count, use_smarray=args.use_smarray)
+    ic = ImageProcClass(sources, worker_count=args.worker_count, output_height=args.output_height, output_width=args.output_width, use_smarray=args.use_smarray)
     ic.run()
