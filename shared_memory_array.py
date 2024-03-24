@@ -47,6 +47,7 @@ class SMArray:
         num_bytes = np.prod(shape) * dtype.itemsize
         self._shm = multiprocessing.shared_memory.SharedMemory(size=num_bytes, create=True)
         self._ndarray = np.ndarray(shape, dtype, buffer=self._shm.buf)
+        self._freed = False
 
     def __setitem__(self, slice_, values):
         self._ndarray.__setitem__(slice_, values)
@@ -61,14 +62,14 @@ class SMArray:
         return self._ndarray
 
     def free(self):
-        try:
-            self._shm.close()
-            self._shm.unlink()
-        except:
-            pass
+        if self._freed:
+            return
+        self._shm.close()
+        self._shm.unlink()
+        self._freed = True
 
     def __getstate__(self):
-        return dict(shape=self._shape, dtype=self._dtype, shm_id=self._shm.name)
+        return dict(shape=self._shape, dtype=self._dtype, shm_id=self._shm.name, freed=self._freed)
 
     def __setstate__(self, state):
         remove_shm_from_resource_tracker()
@@ -76,6 +77,7 @@ class SMArray:
         self._dtype = state['dtype']
         self._shm = multiprocessing.shared_memory.SharedMemory(name=state['shm_id'])
         self._ndarray = np.ndarray(self._shape, self._dtype, buffer=self._shm.buf)
+        self._freed = state['freed']
 
 if __name__ == '__main__':
     queue = multiprocessing.Queue()
