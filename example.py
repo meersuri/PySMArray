@@ -123,10 +123,6 @@ class ImageProcClass:
             self._workers.append(proc)
 
     def _collect_outputs(self):
-        codec = cv.VideoWriter.fourcc('M', 'J', 'P', 'G')
-        height = int(self._sources[0].get(cv.CAP_PROP_FRAME_HEIGHT))
-        width = int(self._sources[0].get(cv.CAP_PROP_FRAME_WIDTH))
-        writer = cv.VideoWriter('merged.avi', codec, 30, (self._out_width, self._out_height))
         done_count = 0
         frames_done = 0
         get_times = []
@@ -140,10 +136,7 @@ class ImageProcClass:
                 continue
             frames_done += 1
             if self._use_smarray:
-                writer.write(out.as_ndarray())
-                out.free() # remember to free or enjoy memory leaks
-            else:
-                writer.write(out)
+                out.free()
 
         total_time = time.time() - start_time
         print('Avg frame deserialize time', np.round(np.mean(get_times)*1000, 2), 'ms')
@@ -151,7 +144,6 @@ class ImageProcClass:
         self._done_event.set()
         [proc.join() for proc in self._workers]
         [source.release() for source in self._sources]
-        writer.release()
 
     def run(self):
         self._prepare_work()
