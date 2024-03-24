@@ -37,8 +37,10 @@ class SMArray:
     def __init__(self, shape, dtype):
         if not isinstance(shape, (list, tuple)):
             raise TypeError("shape must be a list/tuple")
-        if not isinstance(dtype, np.dtype):
+        if not ((isinstance(dtype, type) and issubclass(dtype, np.number)) or isinstance(dtype, np.dtype)):
             raise TypeError("dtype must be a np.dtype")
+        if isinstance(dtype, type):
+            dtype = dtype()
         self._shape = shape
         self._dtype = dtype
         remove_shm_from_resource_tracker()
