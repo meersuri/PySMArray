@@ -7,7 +7,7 @@ from pathlib import Path
 import cv2 as cv
 import numpy as np
 
-from shared_memory_array import SMArray
+from sm_array import SMArray
 
 class PicklableVideoCapture:
     """
