@@ -72,9 +72,13 @@ class SMArray:
         remove_shm_from_resource_tracker()
         self._shape = state['shape']
         self._dtype = state['dtype']
-        self._shm = multiprocessing.shared_memory.SharedMemory(name=state['shm_id'])
+        if not state['freed']:
+            self._shm = multiprocessing.shared_memory.SharedMemory(name=state['shm_id'])
+        else:
+            num_bytes = np.prod(self._shape) * self._dtype.itemsize
+            self._shm = multiprocessing.shared_memory.SharedMemory(create=True, size=num_bytes)
         self._ndarray = np.ndarray(self._shape, self._dtype, buffer=self._shm.buf)
-        self._freed = state['freed']
+        self._freed = False
 
 if __name__ == '__main__':
     queue = multiprocessing.Queue()
